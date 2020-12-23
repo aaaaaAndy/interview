@@ -1,0 +1,19 @@
+{
+  "name": "interview",
+  "version": "1.0.0",
+  "description": "待更新",
+  "main": "index.js",
+  "scripts": {
+    "dev": "docsify serve . --open"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aaaaaAndy/interview.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aaaaaAndy/interview/issues"
+  },
+  "homepage": "https://github.com/aaaaaAndy/interview#readme"
+}
