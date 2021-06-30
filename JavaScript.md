@@ -1,46 +1,83 @@
-# JavaScript常见问题
+### `JavaScript`数据类型
 
-## JavaScript
+#### 1. `es6`之前数据类型
 
-### 1. 数据类型及其判断
+-   基础数据类型：`Stirng`、`Number`、`Boolean`、`Null`、`Undefined`
+-   复杂数据类型：`Object`、`Array`、`Function`
 
-#### 1.1. `JavaScript`的`typeof`返回哪些数据类型
+#### 2. `es6`新增数据类型
+
+-   基础数据类型：`Symbol`、`BigInt`
+-   复杂数据类型：`Set`、`Map`、`WeakSet`、`WeakMap`
+
+### 四大判断数据类型的方法
+
+#### 1. `typeof` 基本判断
 
 ```javascript
-typeof (a = 1);				// number
-typeof (a = '1'); 		// string
-typeof (a = true);		// boolean
-typeof a;							// undefined
-typeof (a = null);		// object
-typeof (a = [1, 2]);	// object
+typeof a;					// undefined
+typeof (a = 1);			  // number
+typeof (a = '1');			// string
+typeof (a = true);		   // boolean
+typeof (a = null);		   // object
+typeof (a = [1, 2]);	     // object
 typeof (a = { });			// object
-typeof (a = Symbol())； 		 // symbol
-typeof (a = function() {}); // function
+typeof (a = Symbol());	   // symbol
+typeof (a = function() {});  // function
 ```
 
-#### 1.2  为什么`typeof null`返回`object`
+​	可以看到，在对`null`类型的判断中返回了`object`，这是因为`typeof`只处理返回了处于原型链最顶端的`object`类型，它的返回没有错，但不是我们想要的结果。具体请看[<<为什么`typeof null`返回`object`>>](#为什么`typeof null`返回`object`)
 
-​		这是一个历史遗留问题，是一个不能修改的错误。在`JavaScript`的第一个版本实现中，用32位存储一个值，包括一个3位的用于表示类型的标识和实际的值。类型标记存储在低位上，一共有5种：
+​	`typeof`基本能判断大部分数据类型，但是有两点特殊：
 
-- 000：对象
-- 1：整数
-- 010：浮点数
-- 100：字符串
-- 110：布尔
+-   对于基本数据类型，除`null`外，均可以返回正确结果；
+-   对于引用数据类型，除`function`外，一律返回`object`类型。
 
-​		也就是说，最低位如果是1，那么类型标记只有1位长；如果是0，那么类型标记有3位长，为4种类型提供两个额外的位。有两个值是特殊的:
+#### 2.  `instanceof` 原型检查
 
-- `undefined` （JSVAL_VOID）是整数−2<sup>30</sup> （整数范围之外的数字）。
-- `null` （JSVAL_NULL）是机器码空指针。或者：一个对象类型标签加上一个零的引用（0000）。
-    现在我们很清楚为什么`typeof`为什么会认为`null`是一个对象了，它检查了`null`的类型标记，类型标记说`object`。
+​	`instanceof` 是用来判断 A 是否为 B 的实例，表达式为：`A instanceof B`，如果 A 是 B 的实例，则返回 true,否则返回 false。 在这里需要特别注意的是：**`instanceof` 检测的是原型**。
 
-#### 1.3 除了`typeof`还有什么判断类型的方法
+​	**instanceof 只能用来判断两个对象是否属于实例关系， 而不能判断一个对象实例具体属于哪种类型。**
 
-##### 1.2.1 `toString`这个是完美的
+​	需要注意的是`instanceof`左侧只能是一个对象，例如`1 instanceof Number`会返回`false`。因为`1`是一个基本数据类型。
 
-​		`toString()` 是 `Object` 的原型方法，调用该方法，默认返回当前对象的 `[[Class]]` 。这是一个内部属性，其格式为` [object Xxx]` ，其中 `Xxx` 就是对象的类型。
+​	`instanceof`操作符的问题在于它假定只有一个全局执行环境，如果网页中包含多个框架，那实际上就存在两个以上的执行环境，从而存在两个以上不同版本的构造函数，如果你从一个框架向另一个框架传入一个数组，那么传入的数组与第二个框架中原生创建的数据分别具有各自不同的构造函数。
 
-​		对于 `Object` 对象，直接调用 `toString()` 就能返回` [object Object]` 。而对于其他对象，则需要通过 `call / apply` 来调用才能返回正确的类型信息。
+```javascript
+var iframe = document.createElement('iframe');
+document.body.appendChild(iframe);
+xArray = window.frames[0].Array;
+var arr = new xArray(1,2,3); // [1,2,3]
+arr instanceof Array; // false
+```
+
+​	针对数组这个问题，`ES5`提供了`Array.isArray()`这个方法用来判断某个对象本身是否为`Array`类型，而不区分在哪个环境中创建。`Array.isArray()`本质上就是检查对象的`[[Class]]`值，`[[Class]]` 是对象的一个内部属性，里面包含了对象的类型信息，其格式为 `[object Xxx]` ，`Xxx` 就是对应的具体类型 。对于数组而言，`[[Class]]` 的值就是 `[object Array]` 。
+
+#### 3. `constructor` 构造函数
+
+​	`constructor`是原型`prototype`的一个属性，当函数被定义时候，`js`引擎会为函数添加原型`prototype`，并且这个`prototype`中`constructor`属性指向函数引用， 因此重写`prototype`会丢失原来的`constructor`。
+
+​	不过这种方法有两个缺陷：
+
+-   一是`null` 和 `undefined` 是无效的对象，也就不存在对应的`constructor`，这两种类型的数据需要通过其他方式判断。
+-   二是如果自定义对象，开发者重写`prototype`之后，原有的`constructor`会丢失，因此，为了规范开发，在重写对象原型时一般都需要重新给 `constructor` 赋值，以保证对象实例的类型不被篡改。
+
+```javascript
+(a = 1).constructor === Number;			// true
+(a = '1').constructor === String;		 // true
+(a = true).constructor === Boolean;	  // true
+(a = {}).constructor === Object;		 // true
+(a = []).constructor === Array;			// true
+(a = function() {}).constructor === Function; // true
+document.constructor === HTMLDocument; // true
+window.constructor === window;			// true
+```
+
+#### 4. `toString`完美的方法
+
+​	`toString()` 是 `Object` 的原型方法，调用该方法，默认返回当前对象的 `[[Class]]` 。这是一个内部属性，其格式为` [object Xxx]` ，其中 `Xxx` 就是对象的类型。
+
+​	对于 `Object` 对象，直接调用 `toString()` 就能返回` [object Object]` 。而对于其他对象，则需要通过 `call / apply` 来调用才能返回正确的类型信息。
 
 ```javascript
 Object.prototype.toString.call('');					// [object String]
@@ -58,60 +95,414 @@ Object.prototype.toString.call(document);        // [object HTMLDocument]
 Object.prototype.toString.call(window);          //[object global] window 是全局对象 global 的引用
 ```
 
-##### 1.2.2 `constructor`
+#### 5. 各种方式优缺点汇总
 
-​		`constructor`是原型`prototype`的一个属性，当函数被定义时候，js引擎会为函数添加原型`prototype`，并且这个`prototype`中`constructor`属性指向函数引用， 因此重写`prototype`会丢失原来的`constructor`。
+| 优缺点 |	typeof|	instanceof|	constructor	|Object.prototype.toString.call|
+| :--: | :--- | ---- | ---- | ---- |
+| &nbsp;&nbsp; 优点 &nbsp;&nbsp; |	使用简单|	能检测出引用类型|	基本能检测所有的类型（除了null和undefined）|	检测出所有的类型|
+|缺点	|只能检测出基本类型（出null）|	不能检测出基本类型，且不能跨iframe|	constructor易被修改，也不能跨iframe|	IE6下，undefined和null均为Object|
 
-​		不过这种方法有两个缺陷：一是`null` 和 `undefined` 无constructor，这种方法判断不了。二是如果自定义对象，开发者重写`prototype`之后，原有的constructor会丢失，因此，为了规范开发，在重写对象原型时一般都需要重新给 `constructor` 赋值，以保证对象实例的类型不被篡改。
+### 为什么`typeof null`返回`object`
 
-```javascript
-(a = 1).constructor === Number;			// true
-(a = '1').constructor === String;		 // true
-(a = true).constructor === Boolean;	  // true
-(a = {}).constructor === Object;		 // true
-(a = []).constructor === Array;			// true
-(a = function() {}).constructor === Function; // true
-document.constructor === HTMLDocument; // true
-window.constructor === window;			// true
-```
+​	这是一个历史遗留问题，是一个不能修改的错误。在`JavaScript`的第一个版本实现中**，用32位存储一个值**，包括一个3位的用于表示类型的标识和实际的值。类型标记存储在低位上，一共有5种：
 
-##### 1.2.3 `instanceof`
+- `000`：对象
+- `1`：整数
+- `010`：浮点数
+- `100`：字符串
+- `110`：布尔
 
-​		`instanceof` 是用来判断 A 是否为 B 的实例，表达式为：`A instanceof B`，如果 A 是 B 的实例，则返回 true,否则返回 false。 在这里需要特别注意的是：**`instanceof` 检测的是原型**。
+​	也就是说，最低位如果是1，那么类型标记只有1位长；如果是0，那么类型标记有3位长，为4种类型提供两个额外的位。有两个值是特殊的:
 
-​		**instanceof 只能用来判断两个对象是否属于实例关系， 而不能判断一个对象实例具体属于哪种类型。**
+- `undefined` （JSVAL_VOID）是整数−2<sup>30</sup> （整数范围之外的数字）。
+- `null` （JSVAL_NULL）是机器码空指针。或者：一个对象类型标签加上一个零的引用（0000）。
+    现在我们很清楚为什么`typeof`为什么会认为`null`是一个对象了，它检查了`null`的类型标记，类型标记说`object`。
 
-​		需要注意的是`instanceof`左侧只能是一个对象，例如`1 instanceof Number`会返回`false`。因为`1`是一个基本数据类型。
+### 怎么进行类型转换
 
+#### 1. 显式/隐式类型转换
 
+>   类型转换发生在静态类型语言的编译阶段，而强制类型转换则发生在动态类型语言的运行时(runtime)。然而在 JavaScript 中通常将它们统称为强制类型转换。
 
-#### 1.4 数组哪些方法会改变自己，哪些不会改变自己
+我个人则倾向于用“隐式强制类型转换”(implicit coercion)和“显式强制类型转换”(explicit coercion)来区分：
 
-##### 1.4.1 会改变原始数组的方法
+-   显式强制类型转换：手动地将一种类型的值转为另一种类型，常见的显式转换方法有：`Number`、`String`、`Boolean`、`parseInt`、`parseFloat`、`toString` 等等；
+-   隐式强制类型转换：一般是在涉及运算符的时候才出现的情况，比如两个不同类型的变量相加减、取反等。
 
-```javascript
-push()
-pop()
-shift()
-unshift()
-splice()
-sort()
-reverse()
-forEach()
-```
+#### 2. 转换为`string`
 
-##### 1.4.2 不改变原始数组的方法
+##### 2.1 `toString()`
+
+这种方法可以将`number`、`boolean`和`object`类型转换为`string`，但是无法转换`null`和`undefined`。
 
 ```javascript
-filter()
-concat()
-slice()
-map()
+(1).toString()			 // '1'
+true.toString()			// 'true'
+({}).toString()			// '[object Object]'
+([]).toString()			// ''
+([1, 2, 3]).toString()	 // ‘1,2,3’
 ```
 
-#### 1.5 如何判断两个对象相等
+​	这里需要注意的是`{}`调用`toString()`是调用了原型链顶端的`toString()`方法，它返回`object`的`[[class]]`属性，而`[]`调用的`toString()`是`Array`重写过之后的方法，这个方法的功能是将数组里的每个值取出拼成一个字符串，并且每个值之间以`,`隔开，这里因为是空数组，所以返回`‘’`。
 
-##### 1.5.1 JSON.stringify(obj)
+##### 2.2 `String()`
+
+​	`string()`是一个全局函数，基本上能转换所有的数据类型为`string`。
+
+```javascript
+String(1)			    // "1"
+String(null)			 // "null"
+String(undefined)		// "undefined"
+String(true)			 // "true"
+String({})		 	  // "[object Object]"
+String([])			   // ""
+String([1, 2, 3])		// "1,2,3"
+```
+
+`String()`转换对象时与`toStirng()`逻辑相同。
+
+##### 2.3 操作符：`+`
+
+​	这是最简单便捷的一种方式，将其他类型的变量加上一个空字符串都可以转成一个字符串类型。
+
+```javascript
+1 + ''			    // "1"
+null + ''			 // "null"
+undefined + ''		// "undefined"
+true + ''			 // "true"
+{} + ''			   // 0
+[] + ''			   // ""
+[1, 2, 3] + ''		// "1,2,3"
+```
+
+#### 3. 转换为`number`
+
+##### 3.1 `Number()`
+
+​	除了要转换的类型本来就是由数字组成之外，其他的转换一律变成`NaN`。
+
+```javascript
+Number('1')			 // 1
+Number('+1')			// 1
+Number('-1')			// -1
+Number('s')			 // NaN
+Number(null)			// 0
+Number(undefined)	   // NaN
+Number({})			  // NaN
+Number([])			  // 0
+Number([1, 2, 3])	   // NaN
+```
+
+##### 3.2 `parseInt(x, 10)`
+
+将其他类型转换成整数类型，后面的10表示的是十进制，取值范围在`2 ~ 37`之间。一般都是进制之间的转换。
+
+```javascript
+parseInt('011',10)			// 11
+parseInt('0x11',10)		   // 0
+parseInt('011',36)			// 37
+parseInt('0x11')			  // 17
+parseInt('08')			    // 8
+parseInt('011',2)			 // 3
+```
+
+##### 3.3 `x - 0`
+
+这是一种最简单快捷的方式，字符串减去一个0可以转换成数字。
+
+```javascript
+'1' - 1			 // 0
+1 - '1'			 // 0
+'1' - '1'		   // 0
+'1' - null		  // 1
+1 - null		    // 1
+null - '1'		  // -1
+null - 1			// -1
+'1' - undefined 	// NaN
+'1' - {}			// NaN
+{} - '1'			// -1
+'1' - []			// 1
+[] - '1'			// -1
+```
+
+##### 3.4 `+x`
+
+在要转换的类型前面加上`+`可以转换成数字，并不是取绝对值。
+
+```javascript
++'1'			// 1
++'-1'		   // -1
++{}			 // NaN
++[]			 // 0
+```
+
+#### 4. 转换为`boolean`
+
+##### 4.1 `Boolean()`
+
+​	可以转换所有类型的值为布尔类型。
+
+```javascript
+Boolean(1)			 // true
+Boolean(null)		  // false
+Boolean(undefined)	 // false
+Boolean({})			// true
+Boolean([])			// true
+Boolean('s')		   // true
+```
+
+##### 4.2 `!!`
+
+​	这是一种最快最便捷的方式将其他类型的值转为布尔类型。
+
+```javascript
+!!1			  // true
+!!null		   // false
+!!undefined	  // false
+!!obj			// true
+!!'s'			// true
+```
+
+### `JavaScript`中`{} + []`与`[] + {}`的区别
+
+​	在`JavaScript`的运算符中，`+`是很重要的一种运算符，不管是数组的运算还是字符串的拼接。在了解本题目之前需要先了解以下两个重点：
+
+1.  加号`+`运算在`JavaScript`中，使用上的规定是什么；
+2.  对象在`JavaScript`是怎么转换为原始数据类型的。
+
+#### 1. 加号运算符
+
+​	在标准中转换的规则还有以下几个，要注意它的顺序：
+
+```javascript
+operand + operand = result
+```
+
+	1. 使用`ToPrimitive`运算转换左与右运算元为原始数据类型值(`primitive`)
+	2. 在第`1`步转换后，如果有运算元出现原始数据类型是"字符串"类型值时，则另一运算元作强制转换为字符串，然后作字符串的连接运算(`concatenation`)
+	3. 在其他情况时，所有运算元都会转换为原始数据类型的"数字"类型值，然后作数学的相加运算(`addition`)
+
+#### 2. `ToPrimitive`内部运算
+
+​	加号运算符只能使用原始数据类型，那么对于对象类型的值就需要先转成原始数据类型。这种情况不止会出现在加号运算中，在关系比较或值相等比较的运算中也是如此。
+
+```javascript
+ToPrimitive(input, PreferredType?)
+```
+
+​	`input`代表代入的值，而`PreferredType`可以是数字(Number)或字符串(String)其中一种，这会代表"优先的"、"首选的"的要进行转换到哪一种原始类型，转换的步骤会依这里的值而有所不同。但如果没有提供这个值也就是预设情况，则会设置转换的`hint`值为`"default"`。这个首选的转换原始类型的指示(`hint`值)，是在作内部转换时由JS视情况自动加上的，一般情况就是预设值。
+
+​	而在`JavaScript`的`Object`原型的设计中，都一定会有两个`valueOf`与`toString`方法，所以这两个方法在所有对象里面都会有，不过它们在转换有可能会交换被调用的顺序。
+
+##### 2.1 当`PreferredType`为数字`(Number)`时
+
+当`PreferredType`为数字(Number)时，`input`为要被转换的值，以下是转换这个`input`值的步骤:
+
+1.  如果`input`是原始数据类型，则直接返回`input`。
+2.  否则，如果`input`是个对象时，则调用对象的`valueOf()`方法，如果能得到原始数据类型的值，则返回这个值。
+3.  否则，如果`input`是个对象时，调用对象的`toString()`方法，如果能得到原始数据类型的值，则返回这个值。
+4.  否则，抛出TypeError错误。
+
+##### 2.2 当`PreferredType`为字符串`(String)`时
+
+上面的步骤2与3对调，如同下面所说:
+
+1.  如果`input`是原始数据类型，则直接返回`input`。
+2.  否则，如果`input`是个对象时，调用对象的`toString()`方法，如果能得到原始数据类型的值，则返回这个值。
+3.  否则，如果`input`是个对象时，则调用对象的`valueOf()`方法，如果能得到原始数据类型的值，则返回这个值。
+4.  否则，抛出TypeError错误。
+
+##### 2.3 `PreferredType`没提供时，也就是`hint`为`"default"`时
+
+​	与`PreferredType`为数字`(Number)`时的步骤相同。**数字**其实是预设的首选类型，也就是说在一般情况下，加号运算中的对象要作转型时，都是先调用`valueOf`再调用`toString`。
+
+​	但这有两个异常，一个是`Date`对象，另一是`Symbol`对象，它们覆盖了原来的`PreferredType`行为，`Date`对象的预设首选类型是字符串`(String)`。因此你会看到在一些教程文件上会区分为两大类对象，一类是 `Date` 对象，另一类叫 非`Date(non-date)` 对象。因为这两大类的对象在进行转换为原始数据类型时，首选类型恰好相反。
+
+#### 3. `valueOf`与`toString`方法
+
+​	在JS中所设计的`Object`纯对象类型的`valueOf`与`toString`方法，它们的返回如下:
+
+-   `valueOf`方法返回值: 对象本身。
+-   `toString`方法返回值:` "[object Object]"`字符串值，不同的内建对象的返回值是`"[object type]"`字符串，`"type"`指的是对象本身的类型识别，例如`Math`对象是返回`"[object Math]"`字符串。但有些内建对象因为覆盖了这个方法，所以直接调用时不是这种值。(注意: 这个返回字符串的前面的`"object"`开头英文是小写，后面开头英文是大写)
+
+​	你有可能会看过，利用`Object`中的`toString`来进行各种不同对象的判断语法，这在以前JS能用的函数库或方法不多的年代经常看到，不过它需要配合使用函数中的`call`方法。
+
+```javascript
+Object.prototype.toString.call([])			// "[object Array]"
+```
+
+#### 4. 实例
+
+##### 4.1 字符串`+`其他原始类型
+
+​	字符串在加号运算有最高的优先级，与字符串相加必定是字符串连接运算。
+
+```javascript
+'1' + 123			// "1123"
+'1' + false			// "1false"
+'1' + null			// "1null"
+'1' + undefined			// "1undefined"
+'1' + {}			// "1[object Object]"
+'1' + []			// "1"
+'1' + 'NaN'			// 1NaN
+```
+
+##### 4.2 数字`+`其他的非字符串的原始数据类型
+
+​	数字与其他类型作相加时，除了字符串会优先使用字符串连接运算`(concatenation)`的，其他都要依照数字为优先，所以除了字符串之外的其他原始数据类型，都要转换为数字来进行数学的相加运算。
+
+```javascript
+1 + true			// 2
+1 + null			// 1
+1 + undefined		// NaN
+1 + {}			// "1undefined"
+1 + []			// "1"
+```
+
+##### 4.3 数字/字符串以外的原始数据类型作加法运算
+
+​	当数字与字符串以外的，其他原始数据类型直接使用加号运算时，就是转为数字再运算，这与字符串完全无关。
+
+```javascript
+true + true			// 2
+true + null			// 1
+undefined + null			// NaN
+```
+
+##### 4.4 空数组与空对象
+
+1.  `[] + []`
+
+```javascript
+[] + []			// ""
+```
+
+​	两个数组相加，依然按照`valueOf -> toString`的顺序，但因为`valueOf`是数组本身，所以会以`toString`的返回值才是原始数据类型，也就是空字符串，所以这个运算相当于两个空字符串在相加，依照加法运算规则第2步骤，是字符串连接运算(concatenation)，两个空字符串连接最后得出一个空字符串。
+
+2.  `{} + {}`
+
+```javascript
+{} + {}			// "[object Object][object Object]"
+```
+
+​	两个空对象相加，依然按照`valueOf -> toString`的顺序，但因为`valueOf`是对象本身，所以会以`toString`的返回值才是原始数据类型，也就是"[object Object]"字符串，所以这个运算相当于两个"[object Object]"字符串在相加，依照加法运算规则第2步骤，是字符串连接运算(concatenation)，最后得出一个"object Object"字符串。
+
+​	但是这个结果有异常，上面的结果只是在Chrome浏览器上的结果(v55)，怎么说呢？
+
+​	有些浏览器例如`Firefox`、`Edge`浏览器会把`{} + {}`直译为相当于`+{}`语句，因为它们会认为以花括号开头(`{`)的，是一个区块语句的开头，而不是一个对象字面量，所以会认为略过第一个`{}`，把整个语句认为是个`+{}`的语句，也就是相当于强制求出数字值的`Number({})`函数调用运算，相当于`Number("[object Object]")`运算，最后得出的是`NaN`。
+
+如果在第一个(前面)的空对象加上圆括号(`()`)，这样JS就会认为前面是个对象，就可以得出同样的结果:
+
+```javascript
+({}) + {}			// "[object Object][object Object]"
+```
+
+3.  `{} + []`
+
+```javascript
+{} + []			// 0
+```
+
+​	上面同样的把`{}`当作区块语句的情况又会发生，不过这次所有的浏览器都会有一致结果，如果`{}`(空对象)在前面，而`[]`(空数组)在后面时，前面(左边)那个运算元会被认为是区块语句而不是对象字面量。
+
+​	所以`{} + []`相当于`+[]`语句，也就是相当于强制求出数字值的`Number([])`运算，相当于`Number("")`运算，最后得出的是`0`数字。
+
+​	特别注意: 所以如果第一个(前面)是`{}`时，后面加上其他的像数组、数字或字符串，这时候加号运算会直接变为一元正号运算，也就是强制转为数字的运算。这是个陷阱要小心。
+
+4.  `[] + {}`
+
+```javascript
+[] + {}			// "[object Object]"
+```
+
+​	`[]`转为`“”`，`{}`转为`“[object Object]”`
+
+### 如何判断两个值相等
+
+`JavaScript`提供三种不同值的比较操作：
+
+#### 1. 非严格相等`==`
+
+​	相等操作符比较两个值是否相等，在比较前将两个被比较的值转换为相同类型。在转换后（等式的一边或两边都可能被转换），最终的比较方式等同于全等操作符 `===` 的比较方式。 相等操作符满足交换律。
+
+```javascript
+console.log([10] == 10);                //true
+console.log('10' == 10);                //true
+console.log([] == 0);                   //true
+console.log(true == 1);                 //true
+console.log([] == false);               //true
+console.log(![] == false);              //true
+console.log('' == 0);                   //true
+console.log('' == false);               //true
+console.log(null == false);             //false
+console.log(!null == true);             //true
+console.log(null == undefined);         //true
+
+console.log(012==12);  // false
+console.log(012==10);  // true
+console.log(099==99);  // true 这种情况是因为八进制中不可能出现9，所以看成一个十进制
+console.log(09==9);    // true 同上
+```
+
+它的比较规则如下：
+
+-   如果Type(x)和Type(y)相同，返回x===y的结果
+-   如果Type(x)和Type(y)不同
+    -   如果x是null，y是undefined，返回true
+    -   如果x是undefined，y是null，返回true
+    -   如果Type(x)是Number，Type(y)是String，返回 x==ToNumber(y) 的结果
+    -   如果Type(x)是String，Type(y)是Number，返回 ToNumber(x)==y 的结果
+    -   如果Type(x)是Boolean，返回 ToNumber(x)==y 的结果
+    -   如果Type(y)是Boolean，返回 x==ToNumber(y) 的结果
+    -   如果Type(x)是String或Number或Symbol中的一种并且Type(y)是Object，返回 x==ToPrimitive(y) 的结果
+    -   如果Type(x)是Object并且Type(y)是String或Number或Symbol中的一种，返回 ToPrimitive(x)==y 的结果
+    -   其他返回false
+
+#### 2. 严格相等`===`
+
+​	全等操作符比较两个值是否相等，两个被比较的值在比较前都不进行隐式转换。如果两个被比较的值具有不同的类型，这两个值是不全等的。否则，如果两个被比较的值类型相同，值也相同，并且都不是 number 类型时，两个值全等。最后，如果两个值都是 number 类型，当两个都不是 NaN，并且数值相同，或是两个值分别为 +0 和 -0 时，两个值被认为是全等的。
+
+```javascript
++0 === -0			// true
+NaN === NaN			// false
+```
+
+它的比较规则如下：
+
+-   如果Type(x)和Type(y)不同，返回false
+
+-   如果Type(x)和Type(y)相同
+    -   如果Type(x)是Undefined，返回true
+    -   如果Type(x)是Null，返回true
+    -   如果Type(x)是String，当且仅当x,y字符序列完全相同（长度相同，每个位置上的字符也相同）时返回true，否则返回false
+    -   如果Type(x)是Boolean，如果x,y都是true或x,y都是false返回true，否则返回false
+    -   如果Type(x)是Symbol，如果x,y是相同的Symbol值，返回true,否则返回false
+    -   如果Type(x)是Number类型
+        -   如果x是NaN，返回false
+        -   如果y是NaN，返回false
+        -   如果x的数字值和y相等，返回true
+        -   如果x是+0，y是-0，返回true
+        -   如果x是-0，y是+0，返回true
+        -   其他返回false
+
+
+
+#### 3. `Object.is()`
+
+`Object`在严格等于的基础上修复了一些特殊情况下的失误，具体来说就是+0和-0，NaN和NaN。 
+
+```javascript
+Object.is(0, -0);            // false
+Object.is(+0, -0);           // false
+Object.is(0, +0);            // true
+Object.is(-0, -0);           // true
+Object.is(NaN, 0/0);         // true
+Object.is(NaN, NaN);				// true
+```
+
+#### 4. 如何判断两个对象相等
+
+##### 4.1. `JSON.stringify(obj)`
 
 ```javascript
 JSON.stringify(obj) === JSON.stringify(otherObj)
@@ -119,23 +510,22 @@ JSON.stringify(obj) === JSON.stringify(otherObj)
 
 这种方法简单，一行代码就搞定，但是有缺点，如下：
 
-- 当对象里key值顺序不一样时，就会出错
+- 当对象里`key`值顺序不一样时，就会出错
 - 一些特殊类型的值，比如`undefined`，`Date`，`RegExp`等会丢失或者变形
 
-##### 1.5.2 递归
+##### 4.2. 递归
 
 实现思路如下：
 
-1. 先判断两个对象的key值的长度。若长度不相等，则 `return false`
-2. 遍历对象`obj1`，检查对象`obj2`中是否有对应的key值， 没有，则`return false`
-3. 比较两个对象中这个key对应的值的类型是否相等，不相等，则`return false`
+1. 先判断两个对象的`key`值的长度。若长度不相等，则 `return false`
+2. 遍历对象`obj1`，检查对象`obj2`中是否有对应的`key`值， 没有，则`return false`
+3. 比较两个对象中这个`key`对应的值的类型是否相等，不相等，则`return false`
 4. 如果值的类型是`undefined`、`number`、`string`、`boolean`的一种，直接两个值比较，不同，则`return false`
 5. 如果值是`null`，那么 比较两个值是否相等。不等，则`return false`
-6. 如果值是`Date`类型的，
-7. 如果值是对象，调用自身
-8. 如果值是数组，因为数组项可能是任意一种数据类型的，所以还是先比较长度，长度相等后再逐一比较数组的每一项。
+6. 如果值是对象，调用自身
+7. 如果值是数组，因为数组项可能是任意一种数据类型的，所以还是先比较长度，长度相等后再逐一比较数组的每一项。
 
-#### 1.6. 如何判断两个值相等
+#### 5. 相等函数的封装
 
 此代码包含了如何比较两个对象相等：
 
@@ -282,9 +672,10 @@ function eq(value, other, vStack, oStack) {
 				}
 
 				while (vKeysLength--) {
-					if (vKeys[vKeysLength] !== oKeys[vKeysLength]) {
-						return false;
-					}
+          // 对象的key顺序可能不一样，但是对象仍然可能相等
+          if (!oKeys.includes(vKeys[vKeysLength])) {
+            return false;
+          }
 
 					let currentKey = vKeys[vKeysLength];
 					if (!eq(value[currentKey], other[currentKey], vStack, oStack)) {
@@ -301,22 +692,43 @@ function eq(value, other, vStack, oStack) {
 }
 ```
 
-#### 1.7 怎么进行类型转换
 
-分为显式类型转换和隐式类型转换
 
-#### 1.8 函数的arguments为什么不是数组？如何转化成数组？
+### 数组有哪些方法会改变自身，哪些不会
+
+#### 1. 会改变原始数组的方法
+
+-   `push`、`pop`、
+-   `shift`、`unshift`、
+-   `splice`、
+-   `sort`、
+-   `reverse`、
+-   `forEach`、
+-   `flat`、
+-   `join`
+
+#### 2. 不会改变原始数组的方法
+
+-   `filter`、
+-   `map`、
+-   `concat`、
+-   `slice`、
+
+
+
+### 函数的`arguments`为什么不是数组
 
 ​		因为`arguments`本身并不能调用数组方法，它是一个另外一种对象类型，只不过属性从0开始排，依次为0，1，2...最后还有`callee`和`length`属性。我们也把这样的对象称为类数组。`arguments`对象除了`length`属性和索引元素之外没有任何`Array`属性，例如，它没有`pop`方法。但是它可以被转换为一个真正的`Array`。
 
 ​		常见的类数组：
 
-- 用getElementsByTagName/ClassName()获得的HTMLCollection
-- 用querySelector获得的nodeList
+- 用`getElementsByTagName/ClassName()`获得的`HTMLCollection`
+- 用`querySelector`获得的`nodeList`
+- 参数`arguments`
 
-将类数组转换为数组的方法
+### 将类数组转换为数组的方法
 
-##### 1.8.1 Array.prototype.slice.call()
+#### 1. `Array.prototype.slice.call()`
 
 ```javascript
 function sum(a, b) {
@@ -326,7 +738,7 @@ function sum(a, b) {
 sum(1, 2);//3
 ```
 
-##### 1.8.2 Array.from()
+#### 2. `Array.from()`
 
 ```javascript
 function sum(a, b) {
@@ -338,7 +750,7 @@ sum(1, 2);//3
 
 这种方法也可以用来转换Set和Map
 
-##### 1.8.3 ES6展开运算符
+#### 3. `ES6`展开运算符
 
 ```javascript
 function sum(a, b) {
@@ -348,7 +760,7 @@ function sum(a, b) {
 sum(1, 2);//3
 ```
 
-##### 1.8.4 利用concat+apply
+#### 4. 利用`concat+apply`
 
 ```javascript
 function sum(a, b) {
@@ -360,14 +772,13 @@ sum(1, 2);//3
 
 当然，最原始的方法就是再创建一个数组，用for循环把类数组的每个属性值放在里面，过于简单，就不浪费篇幅了。
 
-#### 1.9 `forEach`中`return`有效果吗？如何中断`forEach`循环
+### 如何中断`forEach`循环
 
-在`forEach`中用`return`不会返回，函数继续执行。
+​	在`forEach`中用`return`不会返回，函数继续执行。可以通过下列方法来中断`forEach`的循环。
 
-中断方法：
+#### 1. `try...catch...`
 
-1. 使用`try`监视代码块，在需要中断的地方抛出异常
-2. 官方推荐方法：用`every`和`some`替代`forEach`函数，`every`在碰到`return false`的时候，中止循环。`some`在碰到`return true`的时候，中止循环。
+​	使用`try`监视代码块，在需要中断的地方抛出异常
 
 ```javascript
 // try-catch方法跳出forEach循环
@@ -384,10 +795,14 @@ try {
 
 ```
 
+#### 2. `every`或者`some`代替
+
+官方推荐方法：用`every`和`some`替代`forEach`函数，`every`在碰到`return false`的时候，中止循环。`some`在碰到`return true`的时候，中止循环。
+
 ```javascript
-// every
 const aa = [1, 2, 3];
 
+// every
 aa.every(function(x) {
 	console.log(x);
 	if (x === 2) {
@@ -408,34 +823,58 @@ aa.some(function (x) {
 
 ```
 
-#### 1.10 `JavaScript`判断数组中是否包含某个值
+### `JavaScript`判断数组中是否包含某个值
 
-##### 1.10.1 array.indexOf
+#### 1. `array.indexOf`
 
-此方法判断数组中是否存在某个值，如果存在，则返回数组元素的下标，否则返回-1。
+​	此方法判断数组中是否存在某个值，如果存在，则返回数组元素的下标，否则返回-1。
 
-##### 1.10.2 array.includes
+```javascript
+var aa = [1, 2, 3];
+aa.indexOf(2);			// 1
+aa.indexOf(4);			// -1
+```
 
-此方法判断数组中是否存在某个值，如果存在返回true，否则返回false
+#### 2. `array.includes`
 
-##### 1.10.3 array.find
+​	此方法判断数组中是否存在某个值，如果存在返回`true`，否则返回`false`
 
-返回数组中满足条件的**第一个元素的值**，如果没有，返回undefined
+```javascript
+var aa = [1, 2, 3];
+aa.includes(2);			// true
+aa.includes(4);			// false
+```
 
-##### 1.10.4 array.findIndex
+#### 3. `array.find`
 
-返回数组中满足条件的第一个元素的下标，如果没有找到，返回-1
+​	返回数组中满足条件的**第一个元素的值**，如果没有，返回`undefined`
 
-#### 1.11 数组扁平化
+```javascript
+var aa = [1, 2, 2];
+aa.find(v => v > 1);			// 2
+aa.find(v => v > 2);			// undefined
+```
 
-##### 1.11.1 调用ES6中的`flat`方法
+#### 4. `array.findIndex`
+
+​	返回数组中满足条件的第一个元素的下标，如果没有找到，返回-1
+
+```javascript
+var aa = [1, 2, 2];
+aa.findIndex(v => v > 1);			// 1
+aa.findIndex(v => v > 2);			// -1
+```
+
+### 数组扁平化
+
+#### 1. 调用ES6中的`flat`方法
 
 ```javascript
 const arr = [1, [2, [3, [4, 5]]], 6];
 const newArr = arr.flat(Infinity); // [1, 2, 3, 4, 5, 6]
 ```
 
-##### 1.11.2 `replace` + `split`
+#### 2. `replace` + `split`
 
 ```javascript
 const arr = [1, [2, [3, [4, 5]]], 6];
@@ -444,7 +883,7 @@ const newArr = str.replace(/(\[|\])/g, '').split(',')
 console.log(newArr); // [1, 2, 3, 4, 5, 6]
 ```
 
-##### 1.11.3 `replace` + `JSON.parse`
+#### 3. `replace` + `JSON.parse`
 
 ```javascript
 const arr = [1, [2, [3, [4, 5]]], 6];
@@ -454,7 +893,7 @@ const newArr = JSON.parse('[' + newStr + ']');
 console.log(newArr); // [1, 2, 3, 4, 5, 6]
 ```
 
-##### 1.11.4 `reduce` + `concat`
+#### 4. `reduce` + `concat`
 
 ```javascript
 const arr = [1, 2, [3, 4], [5, [6, 7]]];
@@ -468,7 +907,7 @@ function flatten(arr) {
 console.log(flatten(arr)); // [ 1, 2, 3, 4, 5, 6, 7 ]
 ```
 
-##### 1.11.5 `while` + `concat`
+#### 5. `while` + `concat`
 
 ```javascript
 let arr = [1, 2, [3, 4], [5, [6, 7]]];
@@ -480,7 +919,7 @@ while (arr.some(Array.isArray)) {
 console.log(arr); // [ 1, 2, 3, 4, 5, 6, 7 ]
 ```
 
-##### 1.11.6 循环递归
+#### 6. 循环递归
 
 ```javascript
 let arr = [1, 2, [3, 4], [5, [6, 7]]];
@@ -500,9 +939,148 @@ flatten(arr)
 console.log(result); // [ 1, 2, 3, 4, 5, 6, 7 ]
 ```
 
+### 数组去重
 
+##### 1. 利用`ES6`中`set`去重
 
-### 2. 事件机制
+```javascript
+// 方法1
+function unique(arr) {
+  return Array.from(new Set(arr));
+}
+
+// 方法2
+function unique(arr) {
+  return [...new Set(arr)]
+}
+```
+
+不考虑兼容性，这种方法是最好的去重方式，但是这种方式无法去除重复的空对象。
+
+##### 2. `includes`去重
+
+```javascript
+function unique(arr) {
+	var result = [];
+  
+	for (let i = 0; i < arr.length; i++) {
+		if (!result.includes(arr[i])) {
+			result.push(arr[i]);
+		}
+  }
+  
+	return result;
+}
+```
+
+##### 3. `indexOf`去重
+
+```javascript
+function unique(arr) {
+	var result = [];
+
+	for (let i = 0; i < arr.length; i++) {
+		if (result.indexOf(arr[i]) === -1) {
+			result.push(arr[i]);
+		}
+	}
+
+	return result;
+}
+```
+
+##### 4. 双层循环，利用`splice`去重
+
+```javascript
+function unique(arr) {
+	for (let i = 0; i < arr.length; i++) {
+		for (let j = i + 1; j < arr.length; j++) {
+			if (arr[i] === arr[j]) {
+				arr.splice(j, 1);
+				j--;
+			}
+		}
+	}
+
+	return arr;
+}
+```
+
+##### 5. `sort`排序去重
+
+```javascript
+function unique(arr) {
+	var result = [];
+	arr.sort();
+
+	result.push(arr[0]);
+	for (let i = 1; i < arr.length; i++) {
+		if (arr[i] !== arr[i - 1]) {
+			result.push(arr[i]);
+		}
+	}
+
+	return result;
+}
+```
+
+##### 6. 利用对象去重
+
+```javascript
+function unique(arr) {
+	var result = [];
+	var obj = {};
+
+	for (let i = 0; i < arr.length; i++) {
+		if (obj[arr[i]]) {
+			obj[arr[i]]++;
+		} else {
+			result.push(arr[i]);
+			obj[arr[i]] = 1;
+		}
+	}
+
+	return result;
+}
+```
+
+##### 7. `map`去重
+
+```javascript
+function unique(arr) {
+	var result = [];
+	var map = new Map();
+
+	for (let i = 0; i < arr.length; i++) {
+		if (map.has(arr[i])) {
+			map.set(arr[i], true);
+		} else {
+			map.set(arr[i], false);
+			result.push(arr[i]);
+		}
+	}
+
+	return result;
+}
+```
+
+##### 8. `filter`去重
+
+```javascript
+function unique(arr) {
+	return arr.filter((item, index) => arr.indexOf(item, 0) === index);
+}
+```
+
+##### 9. `reduce`去重
+
+```javascript
+function unique(arr) {
+	return arr.reduce((acc, cur) => acc.includes(cur) ? acc : [...acc, cur], []);
+}
+```
+
+### 事件机制
 
 #### 2.1 JavaScript单线程机制
 
@@ -564,7 +1142,7 @@ console.log(result); // [ 1, 2, 3, 4, 5, 6, 7 ]
 
 > **进程是 CPU资源分配的最小单位；线程是 CPU调度的最小单位**
 
-![168333c14c85d794](images/168333c14c85d794.png)
+![168333c14c85d794](https://raw.githubusercontent.com/aaaaaAndy/picture/main/images/20210129135856.png)
 
 - 进程好比图中的工厂，有单独的专属自己的工厂资源。
 
@@ -586,7 +1164,7 @@ console.log(result); // [ 1, 2, 3, 4, 5, 6, 7 ]
 
 ##### 2.5.2 浏览器中的Event Loop
 
-<img src="images/image-20201015163630762.png" alt="image-20201015163630762" style="zoom:50%;" />
+<img src="https://raw.githubusercontent.com/aaaaaAndy/picture/main/images/20210129140631.png" alt="image-20201015163630762" style="zoom:50%;" />
 
 - 一开始执行栈空,我们可以把**执行栈认为是一个存储函数调用的栈结构，遵循先进后出的原则**。micro 队列空，macro 队列里有且只有一个 script 脚本（整体代码）。
 
@@ -611,7 +1189,7 @@ Node.js的运行机制如下:
 - `libuv`库负责Node API的执行。它将不同的任务分配给不同的线程，形成一个Event Loop（事件循环），以异步的方式将任务的执行结果返回给V8引擎。
 - V8引擎再将结果返回给用户。
 
-![16841bd9860c1ee9](images/16841bd9860c1ee9.png)
+![16841bd9860c1ee9](https://raw.githubusercontent.com/aaaaaAndy/picture/main/images/20210129135644.png)
 
 从上图中，大致看出node中的事件循环的顺序：
 
@@ -628,11 +1206,11 @@ Node.js的运行机制如下:
 
 ​		**浏览器环境下，microtask的任务队列是每个macrotask执行完之后执行。而在Node.js中，microtask会在事件循环的各个阶段之间执行，也就是一个阶段执行完毕，就会去执行microtask队列的任务**。
 
-### 3. `JavaScript`原型与原型链
+### `JavaScript`原型与原型链
 
 ​		原型模式是JS实现继承的一种方式。**所有的函数都有一个`prototype`属性，通过`new`生成一个对象时，`prototype`会被实例化为对象的属性。**所有的引用类型都有一个`__proto__`指向其构造函数的`prototype`。原型链的话，指的就是当访问一个引用类型时，如果本身没有这个属性或方法，就会通过`__proto__`属性在父级的原型中找，一级一级往上，直到最顶层为止。
 
-#### 3.1 原型
+#### 原型
 
 ##### 3.1.1 什么是原型
 
@@ -677,7 +1255,55 @@ console.log(per.__proto__ === Person.prototype); //true
 3. 将构造函数的`this`指向这个对象。
 4. 执行构造函数中的代码。
 
-### 4. `JavaScript`继承的几种方式，各有什么优缺点
+实现一个`new`操作符，需要注意构造函数是可以有返回值的，而且当返回值是基本数据类型的时候，通过`new`操作符获取到的是构造函数的实例，但是如果返回值是一个新对象的时候，通过`new`操作符获取到的就不再是其对应的实例，而是`return`出来的这个对象。
+
+```javascript
+// 实现1
+function objectFactory() {
+  let Constructor = [].shift.call(arguments);
+  const obj = new Object();  
+  obj.__proto__ = Conctructor.prototype;
+  const result = Constructor.call(obj,...arguments);
+  return typeof result === 'object' ? result : obj;
+}
+
+// 实现2
+function myNew(Obj,...args){
+  var obj = Object.create(Obj.prototype);//使用指定的原型对象及其属性去创建一个新的对象
+  const result = Obj.apply(obj,args); // 绑定 this 到obj, 设置 obj 的属性
+  return typeof result === 'object' ? result : obj; // 返回实例
+}
+```
+
+#### 3.4 为什么原型链的尽头是`null`
+
+原型链是指**对象的**原型链，所以原型链上的所有节点都是对象，不能是字符串、数字、布尔值等原始类型。
+
+另外，规范要求原型链必须是**有限长度**的(从任一节点出发，经过有限步骤后必须到达一个终点。显然也不能有环。)
+
+那么，应该用什么对象作为终点呢？很显然应该用一个特殊的对象。
+
+好吧，`Object.prototype`确实是个特殊对象，我们先假设用它做终点。那么考虑一下，当你取它的原型时应该怎么办？即
+
+```javascript
+Object.prototype.__proto__;
+```
+
+应该返回什么？
+
+取一个对象的属性时，可能发生三种情况：
+
+1.  如果属性存在，那么返回属性的值。
+2.  如果属性不存在，那么返回undefined。
+3.  不管属性存在还是不存在，有可能抛异常。
+
+我们已经假设`Object.prototype`是终点了，所以看起来不能是情况1。另外，抛出异常也不是好的设计，所以也不是情况3。那么情况2呢，它不存在原型属性，返回undefined怎么样？也不好，因为返回undefined一种解释是原型不存在，但是也相当于原型就是undefined。这样，在原型链上就会存在一个非对象的值。
+
+所以，最佳选择就是null。一方面，你没法访问null的属性，所以起到了终止原型链的作用；另一方面，null在某种意义上也是一种对象，即空对象，因为null一开始就是为表示一个“空”的对象存在的。这样一来，就不会违反“原型链上只能有对象”的约定。
+
+所以，“原型链的终点是null”虽然不是必须不可的，但是却是最合理的。
+
+### `JavaScript`继承的几种方式，各有什么优缺点
 
 #### 4.1 构造函数继承
 
@@ -820,7 +1446,7 @@ Cat.prototype.getName = function() {
 
 #### 5.2 基本数据类型
 
-​		基本数据类型主要是：`undefined，boolean，number，string，null`。基本数据类型存放在栈中，存放在栈内存中的简单数据段，数据大小确定，内存空间大小可以分配，是直接按值存放的，所以可以直接访问。
+基本数据类型主要是：`undefined，boolean，number，string，null`。基本数据类型存放在栈中，存放在栈内存中的简单数据段，数据大小确定，内存空间大小可以分配，是直接按值存放的，所以可以直接访问。
 
 ***基本数据类型的值不可改变***
 
@@ -1134,9 +1760,49 @@ function throttle(fn, delay) {
 
 
 
+### 9. 函数`function`
+
+函数实际上是对象，每个函数实际上都是`Function`类型的实例，而且与其他引用类型一样具有属性和方法。函数名实际上是一个指向内存堆中某个函数对象的指针。
+
+#### 9.1 函数类别
+
+1.  `function`创建
+2.  函数字面量：函数后`function`也可以跟函数名，但是没有意义
+3.  `new`一个`Function`,创建`Fcuntion`的实例
+4.  自执行函数：没有函数名，只能执行一次；
+5.  `ES6`箭头函数
+
+>   函数定义时候写在括号里的参数是形参,函数执行时传进去的参数是实参,形参和实参是一一对应的,arguments 实参集合 类数组（元素集合） return 决定函数的返回值 打断函数执行 this 函数的执行主体(非严格模式下,形参和arguments有映射关系,但在严格模式下却没有)
+
+#### 9.2 函数存储
+
+`JavaScript`中的函数属于引用数据类型，因此，函数存储是开一个16进制的堆内存，把函数体内的代码当字符串存进去。
+
+#### 9.3 函数执行
+
+函数执行是开一个私有作用域（栈内存），把堆内存的代码字符串拿出来执行，先形参赋值，再变量提升，然后代码从上到下执行（执行上下文），函数执行完，变量销毁，作用域销毁。
+
+#### 9.4 变量提升
+
+在代码执行之前`JavaScript`会把代码中带的`var`和`function`的提前声明，带`var`的只声明不定义，带`function`的声明又定义。变量提升，只提升等号左边的内容，对于条件语句来说，无论条件是否成立，都会进行变量提升，在条件句和循环句中的`function`是只声明不定义的。
+
+需要注意只有`var`声明的变量才存在变量提升，`let`和`const`声明的都不会。
+
+#### 9.5 作用域
+
+作用域是代码执行时作用的区域，作用域就是一块栈内存（栈内存是用来存储值类型数据的，还有就是提供代码运行环境）。
+
+#### 9.6 没有重载
+
+ECMAScript函数不能像传统意义上那样实现重载，而在其他语言中（Java），可以为一个函数编写两个定义，只要这两个定义的签名（接收参数的类型和数量）不同即可。
+
+ECMAScript函数没有签名，因为其参数是由包含零个或多个值的数组来表示的。没有函数签名，真正的重载是不可能做到的。在ECMAScript中定义两个名字相同的的函数，则该名字只属于后定义的函数。如何实现类似于Java中的重载呢，其实可以通过判断传入函数的参数类型和个数来做出不同响应。
 
 
-### 9. H5拉起App，如果没有安装跳转应用市场
+
+
+
+###  H5拉起App，如果没有安装跳转应用市场
 
 ### Object.defineProperties都有哪些参数，以及参数解释
 
@@ -1167,3 +1833,13 @@ node中body-parse有什么作用
 
 
 ### 最近在看什么新技术
+
+
+
+
+
+### TODO
+
+-   [ ] `symbol`、`bigInt` 详情
+-   [ ] `Set`、`map`、`weakSet`、`weakMap`详情
+-   [ ] 字符串1加上数字1、字符串1减去数字1

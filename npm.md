@@ -6,7 +6,7 @@
 
 ### 1. 剖析package.json
 
-![20201111160224](images/20201111160224.jpg)
+![20201111160224](https://raw.githubusercontent.com/aaaaaAndy/picture/main/images/20210129140046.jpg)
 
 在 `Node.js` 中，模块是一个库或框架，也是一个 `Node.js` 项目。`Node.js` 项目遵循模块化的架构，当我们创建了一个 `Node.js` 项目，意味着创建了一个模块，这个模块必须有一个描述文件，即 `package.json`
 
@@ -56,7 +56,7 @@
 
 ### 5. 剖析`npm install`运行原理
 
-![20201111165231](images/20201111165231.jpg)
+![20201111165231](https://raw.githubusercontent.com/aaaaaAndy/picture/main/images/20210129140117.jpg)
 
 `npm install` 大概会经过上面的几个流程，这一章就来讲一讲各个流程的实现细节、发展以及为何要这样实现。
 
