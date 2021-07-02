@@ -4,7 +4,9 @@
   "description": "待更新",
   "main": "index.js",
   "scripts": {
-    "dev": "docsify serve ."
+    "dev:docsify": "docsify serve .",
+    "dev": "vuepress dev .",
+    "build": "vuepress build . --dest=docs"
   },
   "repository": {
     "type": "git",
@@ -15,5 +17,11 @@
   "bugs": {
     "url": "https://github.com/aaaaaAndy/interview/issues"
   },
-  "homepage": "https://github.com/aaaaaAndy/interview#readme"
+  "homepage": "https://github.com/aaaaaAndy/interview#readme",
+  "devDependencies": {
+    "vuepress": "^1.8.2"
+  },
+  "dependencies": {
+    "vuepress-theme-reco": "^1.6.6"
+  }
 }
