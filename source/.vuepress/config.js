@@ -10,9 +10,9 @@ module.exports = {
         collapsable: false, // 可选的, 默认值是 true,
         sidebarDepth: 1,    // 可选的, 默认值是 1
         children: [
-          ['/JavaScript', 'JavaScript',],
-          ['/html', 'html'],
-          ['/css', 'css']
+          ['/JavaScript', 'JavaScript'],
+          ['/html', 'HTML'],
+          ['/css', 'CSS']
         ]
       },
       {
@@ -23,7 +23,7 @@ module.exports = {
           ['/React', 'React'],
           ['/Vue', 'Vue'],
           ['/Taro', 'Taro'],
-          '/微信小程序'
+          ['/wechat-app', '微信小程序']
         ]
       },
       {
@@ -31,8 +31,8 @@ module.exports = {
         collapsable: false, // 可选的, 默认值是 true,
         sidebarDepth: 1,    // 可选的, 默认值是 1
         children: [
-          '/npm',
-          '/webpack'
+          ['/npm', 'npm'],
+          ['/webpack', 'webpack']
         ]
       },
       {
@@ -40,8 +40,8 @@ module.exports = {
         collapsable: false, // 可选的, 默认值是 true,
         sidebarDepth: 1,    // 可选的, 默认值是 1
         children: [
-          '/计算机网络',
-          '/网络安全',
+          ['/computer-network', "计算机网络"],
+          ['/net-security', "网络安全"]
         ]
       },
       {
@@ -49,7 +49,7 @@ module.exports = {
         collapsable: false, // 可选的, 默认值是 true,
         sidebarDepth: 1,    // 可选的, 默认值是 1
         children: [
-          '/算法',
+          ['/algorithm', "算法"]
         ]
       },
       {
@@ -57,8 +57,8 @@ module.exports = {
         collapsable: false, // 可选的, 默认值是 true,
         sidebarDepth: 1,    // 可选的, 默认值是 1
         children: [
-          '/性能优化',
-          '/设计模式',
+          ['/performance', "性能优化"],
+          ['/Design-Patterns', "设计模式"]
         ]
       },
     ],

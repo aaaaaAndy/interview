@@ -4,9 +4,10 @@
   "description": "待更新",
   "main": "index.js",
   "scripts": {
-    "dev:docsify": "docsify serve .",
-    "dev": "vuepress dev .",
-    "build": "vuepress build . --dest=docs"
+    "dev:docsify": "docsify serve source",
+    "dev": "vuepress dev source",
+    "build": "vuepress build source --dest=docs",
+    "deploy": "yarn build && sh git.sh"
   },
   "repository": {
     "type": "git",
