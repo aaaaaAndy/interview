@@ -1,7 +1,7 @@
 module.exports = {
   title: '都是知识点',
 
-  base: '/interview',
+  base: '/interview/',
 
   theme: 'reco',
 
