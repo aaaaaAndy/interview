@@ -527,7 +527,7 @@ JSON.stringify(obj) === JSON.stringify(otherObj)
 
 #### 5. 相等函数的封装
 
-此代码包含了如何比较两个对象相等：
+此代码包含了如何比较两个对象相等 ，具体也可查看[`codepen.io`](https://codesandbox.io/s/equal-iyvfu?file=/index.js)：
 
 ```javascript
 const NUMBER_TAG = '[object Number]';
@@ -713,6 +713,8 @@ function eq(value, other, vStack, oStack) {
 -   `map`、
 -   `concat`、
 -   `slice`、
+-   `every`、
+-   `some`、
 
 
 
@@ -738,7 +740,17 @@ function sum(a, b) {
 sum(1, 2);//3
 ```
 
-#### 2. `Array.from()`
+#### 2. `Array.prototype.concat.apply()`
+
+```javascript
+function sum(a, b) {
+  let args = Array.prototype.concat.apply([], arguments);//apply方法会把第二个参数展开
+  console.log(args.reduce((sum, cur) => sum + cur));//args可以调用数组原生的方法啦
+}
+sum(1, 2);//3
+```
+
+#### 3. `Array.from()`
 
 ```javascript
 function sum(a, b) {
@@ -750,7 +762,7 @@ sum(1, 2);//3
 
 这种方法也可以用来转换Set和Map
 
-#### 3. `ES6`展开运算符
+#### 4. `ES6`展开运算符
 
 ```javascript
 function sum(a, b) {
@@ -760,15 +772,7 @@ function sum(a, b) {
 sum(1, 2);//3
 ```
 
-#### 4. 利用`concat+apply`
-
-```javascript
-function sum(a, b) {
-  let args = Array.prototype.concat.apply([], arguments);//apply方法会把第二个参数展开
-  console.log(args.reduce((sum, cur) => sum + cur));//args可以调用数组原生的方法啦
-}
-sum(1, 2);//3
-```
+#### 5. 自力更生
 
 当然，最原始的方法就是再创建一个数组，用for循环把类数组的每个属性值放在里面，过于简单，就不浪费篇幅了。
 

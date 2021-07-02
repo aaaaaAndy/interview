@@ -9,6 +9,10 @@
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
   <link rel="stylesheet" href="//unpkg.com/mermaid/dist/mermaid.min.css">
   <style>
+    body {
+      font-family: "JetBrains Mono Medium";
+    }
+
     .sidebar {
       width: 400px;
     }
@@ -28,8 +32,17 @@
       display: table;
     }
 
-    .markdown-section h3 {
+    .markdown-section h1, h2 {
       text-align: center;
+    }
+
+    blockquote {
+      background-color: #fafafa;
+      padding: 1px 0;
+    }
+
+    .markdown-section > p {
+      text-indent: 2em;
     }
   </style>
 </head>
