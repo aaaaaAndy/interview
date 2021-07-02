@@ -7,7 +7,7 @@
     "dev:docsify": "docsify serve source",
     "dev": "vuepress dev source",
     "build": "vuepress build source --dest=docs",
-    "deploy": "yarn build && sh git.sh"
+    "dp": "yarn build && sh git.sh"
   },
   "repository": {
     "type": "git",
