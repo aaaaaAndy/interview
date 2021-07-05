@@ -23,6 +23,8 @@ module.exports = {
         sidebarDepth: 1,    // 可选的, 默认值是 1
         children: [
           ['/React', 'React'],
+          ['/Redux', 'Redux'],
+          ['/React-router', 'React-Router'],
           ['/Vue', 'Vue'],
           ['/Taro', 'Taro'],
           ['/wechat-app', '微信小程序']

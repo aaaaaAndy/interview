@@ -1,20 +1,62 @@
 ## 什么是`React`
 
+### 1. 基础概念
+
 >   React - A JavaScript library for building user interface.
 >
 >   用于构建用户界面的JavaScript库
 
-`React`是`Facebook`在2011年开发的用于构建用户界面的`JavaScript`库，它官网的首页有三大特点：
+`React`是`Facebook`在2011年开发的用于构建用户界面的`JavaScript`库，它[官网](https://zh-hans.reactjs.org/)的首页有三大特点：
 
 1.  声明式：以声明式编写`UI`，让你的代码更可靠([什么是声明式](https://zhuanlan.zhihu.com/p/26085755))；
+
 2.  组件化：可以创建高可复用组件；
+
 3.  一次学习，处处编写：支持`Node`端渲染，支持`React Native`开发跨平台应用；
 
-## 什么是`JSX`
+### 2. `react`有哪些优缺点
 
-​	当`Facebook`第一次发布`React`时，他们还引入了一种新的`JavaScript`方言`JSX`，它不能被浏览器读取，必须使用`Babel`和`webpack`等工具将其转换为传统的`JS`。
+#### 2.1 `react`优点
 
-​	`JSX` 是`JavaScript XML`的简写，它利用`JavaScript`的表现力和类似`HTML`的模板语法。这使得`HTML`文件非常容易理解。此文件能使应用非常可靠，并能够提高其性能。
+-   它提高了应用的性能
+
+-   可以方便地在客户端和服务器端使用
+
+-   由于使用`JSX`，代码的可读性很好
+
+-   `React` 很容易与 `Meteor`，`Angular` 等其他框架集成
+
+-   使用`React`，编写`UI`测试用例变得非常容易
+
+#### 2.2 `react`缺点
+
+-   `React` 只是一个库，而不是一个完整的框架
+
+-   它的库非常庞大，需要时间来理解
+
+-   新手程序员可能很难理解
+
+-   编码变得复杂，因为它使用内联模板和 `JSX`
+
+#### 2.3 `react`特点
+
+-   它使用**虚拟DOM **而不是真正的`DOM`。
+-   它可以用**服务器端渲染**。
+-   它遵循**单向数据流**或数据绑定。
+
+### 	3. 前端三大流行库之间对比
+
+
+| **主题**      | **React**              | **Angular**     | `Vue`                   |
+| ------------- | ---------------------- | --------------- | ----------------------- |
+| *1. 体系结构* | 只有 `MVC` 中的 `View` | 完整的 `MVC`    | `MVVM`，一种`MVC`的改版 |
+| *2. 渲染*     | 可以在服务器端渲染     | 客户端渲染      | 可以在服务端渲染        |
+| *3. DOM*      | 使用 `virtual DOM`     | 使用 `real DOM` | 使用 `virtual DOM`      |
+| *4. 数据绑定* | 单向数据绑定           | 双向数据绑定    | 双向数据绑定            |
+| *5. 调试*     | 编译时调试             | 运行时调试      |                         |
+| *6. 作者*     | `Facebook`             | `Google`        | 尤雨溪                  |
+
+
 
 ## 什么是虚拟`DOM`
 
@@ -48,15 +90,15 @@
 
 ## `state`与`props`
 
-#### 1. 什么是`state`
+### 1. 什么是`state`
 
 ​	状态是`React`组件的核心，是数据的来源，必须尽可能简单。基本上状态是确定组件呈现和行为的对象。与`props`不同，它们是可变的，并创建动态和交互式组件。可以通过 `this.state` 访问它们。
 
-#### 2. 什么是`props`
+### 2. 什么是`props`
 
 ​	`Props`是`React`中属性的简写。它们是只读组件，必须保持纯，即不可变。它们总是在整个应用中从父组件传递到子组件。子组件永远不能将`prop`送回父组件。这有助于维护单向数据流，通常用于呈现动态生成的数据。
 
-#### 3. `state`和`props`区别
+### 3. `state`和`props`区别
 
 `props`和`state`是普通的`JavaScript`对象，虽然他们都包含影响渲染输出的信息，但是他们在组件方面的功能是不同的，即：
 
@@ -65,7 +107,7 @@
 -   没有`state`的叫做无状态组件，有`state`的叫做有状态组件；
 -   多用`props`,少用`state`，也就是多写无状态组件。
 
-#### 4. 区分有状态和无状态组件
+### 4. 区分有状态和无状态组件
 
 | **有状态组件**                                               | **无状态组件**                                  |
 | ------------------------------------------------------------ | ----------------------------------------------- |
@@ -76,7 +118,7 @@
 
 ## 什么是`refs`
 
-#### 1. 基础定义
+### 1. 基础定义
 
 ​	`Refs`是`React`中引用的简写。它是一个有助于存储对特定的`React`元素或组件的引用的属性，它将由组件渲染配置函数返回。用于对`render()`返回的特定元素或组件的引用。当需要进行`DOM`测量或向组件添加方法时，它们会派上用场。以下是应该使用`refs`的情况：
 
@@ -101,191 +143,423 @@ function CustomForm({ handleSubmit }) {
 }
 ```
 
-#### 2. 如何创建`refs`
+### 2. 如何创建`refs`
 
 古往今来有四种方法可以创建`refs`：
 
-1.  字符串
+#### 2.1 字符串
 
-    这种方法已被废除，原因如下:
+这种方法已被废除，原因如下:
 
-    -   由于无法知道`this`，所以需要`react`去跟踪当前组件，这就会拖慢`react`的效率；
-    -   无法在一个子元素上放置多个`ref`,即无法对`ref`进行组合，回调函数可以对`ref`进行操作；
-    -   `String ref`不能使用`Flow`之类的静态分析，`Flow`不能猜测框架使用的`ref`的神奇效果和类型，回调引用比静态分析更更友好；
+-   由于无法知道`this`，所以需要`react`去跟踪当前组件，这就会拖慢`react`的效率；
+-   无法在一个子元素上放置多个`ref`,即无法对`ref`进行组合，回调函数可以对`ref`进行操作；
+-   `String ref`不能使用`Flow`之类的静态分析，`Flow`不能猜测框架使用的`ref`的神奇效果和类型，回调引用比静态分析更更友好；
 
-    ```jsx
-    import React from 'react';
-    
-    class App extends React.Component {
-      inputRef = null;
-    
-    	render() {
-        return (
-        	<input ref="inputRef" />
-        )
-      }
-    }
-    ```
+```jsx
+import React from 'react';
 
-2.  回调函数
+class App extends React.Component {
+  inputRef = null;
 
-    ```jsx
-    import React from 'react';
-    
-    function App() {
-      let inputRef = null;
-      
-      return (
-      	<input ref={(ref) => { inputRef = ref; }} />
-      )
-    }
-    ```
+	render() {
+    return (
+    	<input ref="inputRef" />
+    )
+  }
+}
+```
 
-3.  `createRef()`
+#### 2.2 回调函数
 
-    ```jsx
-    import React, { createRef } from 'react';
-    
-    class App extends React.Component {
-      inputRef = createRef();
-    
-    	render() {
-        return (
-        	<input ref={this.inputRef} />
-        )
-      }
-    }
-    ```
+```jsx
+import React from 'react';
 
-4.  `useRef()`
+function App() {
+  let inputRef = null;
+  
+  return (
+  	<input ref={(ref) => { inputRef = ref; }} />
+  )
+}
+```
 
-    其实此种方法与`createRef`方法归属于同一类，因为`createRef`是`class`组件中创建应用的方式，`useRef`是`function`组件创建引用的方式。
+#### 2.3 `createRef()`
 
-    ```jsx
-    import React, { useRef } from 'react';
-    
-    function App() {
-      let inputRef = useRef();
-      
-      return (
-      	<input ref={inputRef} />
-      )
-    }
-    ```
+```jsx
+import React, { createRef } from 'react';
+
+class App extends React.Component {
+  inputRef = createRef();
+
+	render() {
+    return (
+    	<input ref={this.inputRef} />
+    )
+  }
+}
+```
+
+#### 2.4 `useRef()`
+
+其实此种方法与`createRef`方法归属于同一类，因为`createRef`是`class`组件中创建应用的方式，`useRef`是`function`组件创建引用的方式。
+
+```jsx
+import React, { useRef } from 'react';
+
+function App() {
+  let inputRef = useRef();
+  
+  return (
+  	<input ref={inputRef} />
+  )
+}
+```
 
 ## `react`中的生命周期
 
 ### 1. `16.3`之前版本生命周期
 
-![lifecycle-old](https://raw.githubusercontent.com/aaaaaAndy/picture/main/images/lifecycle-old.jpg)
+​	在`react v16.3`之前的版本中，还存在`componentWillMount`、`componentWillUpdate`和`componentWillReceiveProps`三个生命周期。
 
 ![16ea6f5e9424c2a2](https://raw.githubusercontent.com/aaaaaAndy/picture/main/images/16ea6f5e9424c2a2.png)
 
-
-
-
+![lifecycle-old](https://raw.githubusercontent.com/aaaaaAndy/picture/main/images/lifecycle-old.jpg)
 
 ### 2. `16.3`生命周期
 
+​	在`react v16.3`版本中，`react`官方将`componentWillMount`、`componentWillUpdate`和`componentWillReceiveProps`这三个生命周期前边加上了`UNSAFE_`，以标记这三个声明周期时不安全的，并计划在`react v17`中删除这三个`API`。
 
+​	![image-20210702160111943](https://raw.githubusercontent.com/aaaaaAndy/picture/main/images/20210702160112.png)
 
-### 3. `16.4`及之后版本生命周期
+### 3. `16.4`及其之后版本生命周期
 
-其中16.3与16.4之后的声明周期也有些许不同，具体可看：[生命周期图谱](https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
+其中`16.3`与`16.4`之后的声明周期也有些许不同，具体可看：[生命周期图谱](https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/)
+
+![image-20210702160207730](https://raw.githubusercontent.com/aaaaaAndy/picture/main/images/20210702160207.png)
 
 ![lifecyclt-new](https://raw.githubusercontent.com/aaaaaAndy/picture/main/images/20210129135428.jpg)
 
 
 
+## `react`新老生命周期思考
+
+### 1. 为什么要废除三个`will`生命周期
+
+​	从生命周期图谱中可以看出，被废弃的三个函数都是在`render`之前，因为`fiber`的出现，很可能因为高优先级任务的出现而打断现有任务导致它们会被执行多次。
+
+​	另外一种原因是，弃用的生命周期经常被误解和滥用，造成不安全的隐患。`React`想约束使用者，好的框架能够让人不得已写出容易维护和扩展的代码。
+
+#### 1.1 `componentWillMount`
+
+​	首先来说，在`16.3`之前的版本中，我们习惯性会在`componentWillMount`中请求数据，以期望能尽快加载数据，减少白屏时间。这种想法是很好的，但是实际情况却不容乐观。
+
+​	此生命周期的主要问题如下：
+
+-   节省的时间非常少，跟其他的延迟情况相比，这个优化可以说是九牛一毛，并且`render`函数肯定比异步数据先到达执行，白屏时间并不会减少；
+
+-   如果使用服务端渲染，`componentWillMount`会在服务端和客户端各执行一次，这会导致两次请求；
+-   在`Fiber`之后，由于任务可中断，`componentWillMount`可能会被执行多次。
+-   如果再此生命周期中订阅事件，可能会重复，而且服务端不会执行`componentWillUnMount`,这可能导致内存泄露，这是不安全的。
+
+#### 1.2 `componentWillReceiveProps`
+
+​	`componentWillReceiveProps` 可能在一次更新中被多次调用。因此，避免在此方法中产生副作用非常重要。相反，应该使用 `componentDidUpdate`，因为它保证每次更新只调用一次。
+
+#### 1.3 `componentWillUpdate`
+
+​	在异步模式下使用 `componentWillUpdate` 都是不安全的，因为外部回调可能会在一次更新中被多次调用。相反，应该使用 `componentDidUpdate` 生命周期，因为它保证每次更新只调用一次。
+
+### 2. 为什么要新增两个声明周期
+
+#### 2.1 `static getDerivedStateFromProps`
+
+​	`getDerivedStateFromProps` 会在调用 render 方法之前调用（**每次渲染前都会触发**），并且在初始挂载及后续更新时都会被调用。它应返回一个对象来更新 state，如果返回 null 则不更新任何内容。
+
+​	`static getDerivedStateFromProps()`是个静态方法，不能执行副作用（如异步调用数据等）。很大程度上避免了误操作。将副作用操作放到`componentDidUpdate`，保证每次更新只调用一次，而不是不管是不是更新完成了，进行了多次调用，出现卡死等问题。
+
+​	`getDerivedStateFromProps`和`componentDidUpdate`组合使用，基本可以覆盖所有`componentWillReceiveProps` 的使用场景。
+
+#### 2.2 `getSnapshotBeforeUpdate`
+
+​	`getSnapshotBeforeUpdate()` 在最近一次渲染输出（提交到 DOM 节点）之前调用。它使得组件能在发生更改之前从 DOM 中捕获一些信息（例如，滚动位置，高度等）。此生命周期的任何返回值将作为参数传递给 `componentDidUpdate()`。应返回 snapshot 的值（或 `null`）。
+
 ## `react`中的高阶组件
+
 >   译注：永远不要在 `React render()` 方法中定义 `React` 组件（甚至是无状态组件）。`React` 在每次更新状态的时候，都会废弃旧的 `html DOM` 元素并将其替换为全新的元素。比如在 `render()` 函数中定义一个输入组件，元素被替换之后就会失去焦点，每次只能输入一个字符。
 
-#### 1. 参考文档
+详情可参考一下两篇文档：
 
-1.  [深入理解React高阶组件](https://zhuanlan.zhihu.com/p/24776678)
+-   [深入理解React高阶组件](https://zhuanlan.zhihu.com/p/24776678)
+-   [React高阶组件入门](https://juejin.cn/post/6844904050236850184#heading-11)
 
-2.  [React高阶组件入门](https://juejin.cn/post/6844904050236850184#heading-11)
+### 1. 基础
 
-#### 2. 基础
+​	高阶组件`HOC`是`react`中用于组件复用逻辑的一种高级技巧，它并不是一个新的`API`，而是一种基于`React`组件特性的一种设计模式。需要注意的是：组件是将`props`转化为`UI`，而高阶组件是将组件转化为另一种组件。
 
-高阶组件`HOC`是`react`中用于组件复用逻辑的一种高级技巧，它并不是一个新的`API`，而是一种基于`React`组件特性的一种设计模式。
-
-需要注意的是：组件是将`props`转化为`UI`，而高阶组件是将组件转化为另一种组件。
-
-高阶组件`（HOC）`是接收一个组件并返回一个组建的函数。基本上，这是一种模式，从`React`的组合特性中衍生出来。
+​	高阶组件`（HOC）`是接收一个组件并返回一个组建的函数。基本上，这是一种模式，从`React`的组合特性中衍生出来。
 
 ```jsx
 const EnhancedComponent = higherOrderComponent(WrappedComponent);
 ```
 
-#### 3. 适用情况
+### 2. 实现方式
 
-高阶组件可用于以下情况：
+​	通常情况下，实现高阶组件的方式有以下两种：
 
--   属性代理`(props proxy)`
-    -   操作`props`
-    -   抽象`state`
-    -   获取`refs`引用
-    -   获取原组件的`static`方法
-    -   通过`props`实现条件渲染
-    -   用其他元素包裹传入组件
--   反向继承
-    -   渲染劫持
-    -   劫持原组件生命周期方法
-    -   读取/操作原组件state
+#### 1. 属性代理`(props proxy)`
 
-#### 4. 属性代理和反向继承的对比
+​	属性代理是最常见的实现方式，它的本质是使用组合的方式，通过将组件包裹在容器组件中来实现功能。属性代理实现的高阶组件和原组件之间的关系完全是父子组件的关系，所以用该方式实现的组件会影响原组件的某些生命周期。
 
-属性代理是从“组合”的角度出发，这样有利于从外部去操作 `WrappedComponent`，可以操作的对象是 `props`，或者在 `WrappedComponent` 外面加一些拦截器，控制器等。
+##### 1.1 操作`props`
 
-反向继承则是从“继承”的角度出发，是从内部去操作 `WrappedComponent`，也就是可以操作组件内部的 `state` ，生命周期，`render`函数等等。
+​	通过拦截父组件的`props`来对`props`进行一些列操作，比如，增减一个属性等。
 
+```jsx
+function HOC(WrappedComponent) {
+  return class Person extends React.Component {
+    render() {
+      const newProps = { name: 'andy' };
+      
+      return <WrappedComponent {...this.props} {...newProps} />
+    }
+  }
+}
+```
 
+##### 1.2 抽象`state`
 
-## `react`有哪些优缺点
+​	需要注意，通过属性代理方式实现的高阶组件无法操作原组件的`state`，但是可以通过传入`props`和回调函数对`state`进行抽象。常见的例子是非受控组件到受控组件之间的转换。
 
-### 1. `react`优点
+```jsx
+// 高阶函数定义
+function HOC(WrappedComponent) {
+  return class Person extends React.Component {
+    constructor(props) {
+      super(props);
+      
+      this.state = {
+        name: 'andy',
+      }
+    }
+    
+    onChange = (e) => {
+      this.setState({
+        name: e.target.value
+      })
+    }
+    
+    render() {
+      const newProps = {
+        name: {
+          value: this.state.name,
+          onChange: this.onChange,
+        }
+      }
+      
+      return <WrappedComponent {...this.props} {...newProps} >
+    }
+  }
+}
 
--   它提高了应用的性能
+// 高阶函数使用
+@HOC
+class Andy extends React.Component {
+  render() {
+    return <input {...this.props.name}>
+  }
+}
+```
 
--   可以方便地在客户端和服务器端使用
+##### 1.3 获取`refs`引用
 
--   由于使用`JSX`，代码的可读性很好
+​	通过属性代理方式实现的高阶组件无法直接访问原组件的`refs`引用，但是可以通过传入回调函数来取出原组件的`refs`引用。
 
--   `React` 很容易与 `Meteor`，`Angular` 等其他框架集成
+```jsx
+// 高阶函数定义
+function HOC(WrapperComponent) {
+  return class extends React.Component {
+    inputElement = null;
+    
+    render() {
+      return <WrapperComponent inputRef={ref => { this.inputElement = ref; }} />
+    }
+  }
+}
 
--   使用`React`，编写`UI`测试用例变得非常容易
+// 高阶函数使用
+@HOC
+class Andy extends React.Component {
+  render() {
+    return <input ref={this.props.inputRef}>
+  }
+}
+```
 
-### 2. `react`缺点
+##### 1.4 获取原组件的`static`方法
 
--   `React` 只是一个库，而不是一个完整的框架
+​	当待处理组件为`class`组件时，通过属性代理实现的高阶组件，均可以获取到原组件的`static`方法。
 
--   它的库非常庞大，需要时间来理解
+```jsx
+// 高阶函数定义
+function HOC(WrapperComponent) {
+  return class extends React.Component {
+    inputElement = null;
+  
+  	componentDidMount() {
+      this.inputElement.sayName();
+    }
+    
+    render() {
+      return <WrapperComponent inputRef={ref => { this.inputElement = ref; }} />
+    }
+  }
+}
 
--   新手程序员可能很难理解
+// 高阶函数使用
+@HOC
+class Andy extends React.Component {
+  static sayName = () => {
+    console.log('andy');
+  }
+  
+  render() {
+    return <input ref={this.props.inputRef}>
+  }
+}
+```
 
--   编码变得复杂，因为它使用内联模板和 `JSX`
+##### 1.5 通过`props`实现条件渲染
 
-### 3. `react`特点
+​	通过属性代理方式实现的高阶组件无法实现对原组件的渲染劫持，但是可以通过`props`来控制是否传入数据以及是否渲染。
 
--   它使用**虚拟DOM **而不是真正的`DOM`。
--   它可以用**服务器端渲染**。
--   它遵循**单向数据流**或数据绑定。
+```jsx
+// 高阶组件定义
+function HOC(WrapperComponent) {
+  return class extends React.Component {
+    return (
+    	<div>
+      	{
+       		this.props.show
+       			? <WrapperComponent />
+       			: <div>暂无数据</div>
+       	}	
+      </div>
+    )
+  }
+}
+```
 
-## 	前端三大流行库之间对比
+##### 1.6 用其他元素包裹传入组件
 
-| **主题**      | **React**              | **Angular**     | `Vue`                   |
-| ------------- | ---------------------- | --------------- | ----------------------- |
-| *1. 体系结构* | 只有 `MVC` 中的 `View` | 完整的 `MVC`    | `MVVM`，一种`MVC`的改版 |
-| *2. 渲染*     | 可以在服务器端渲染     | 客户端渲染      | 可以在服务端渲染        |
-| *3. DOM*      | 使用 `virtual DOM`     | 使用 `real DOM` | 使用 `virtual DOM`      |
-| *4. 数据绑定* | 单向数据绑定           | 双向数据绑定    | 双向数据绑定            |
-| *5. 调试*     | 编译时调试             | 运行时调试      |                         |
-| *6. 作者*     | `Facebook`             | `Google`        | 尤雨溪                  |
+​	用其他元素将原组件包裹起来，用来实现一些特定的布局、样式等。
 
-## 12. `super`
+```jsx
+function HOC(WrapperComponent) {
+  return class extends React.Component {
+    render() {
+      return (
+        <div style={{ backgroundColor: '#fafafa' }}>
+        	<WrapperComponent />
+        </div>
+      )
+    }
+  }
+}
+```
 
-在调用`super()`方法之前，子类构造函数无法使用`this`引用，`ES6`子类也是如此。将`props`参数传递给`super()`调用的主要原因是在子构造函数中能够通过`this.props`来获取传入的`props`。
+#### 2. 反向继承
+
+​	反向继承指的是使用一个函数和传入一个组件类型的参数，并返回一个继承了该组件的类组件，且在返回组件的`render()`方法中返回`super.render()`方法。
+
+​	相较于属性代理方式，反向继承实现的高阶组件的特点是允许高阶组件通过`this`访问到原组件，所以可以直接读取和操作原组件的`state/refs/`生命周期方式等。
+
+##### 2.1 渲染劫持
+
+```jsx
+// 条件渲染
+function HOC(WrapperComponent) {
+  return class extends WrapperComponent {
+    render() {
+      if (this.props.show) {
+        return super.render()
+      } else {
+        return <div>暂无数据</div>
+      }
+    }
+  }
+}
+
+// 修改React元素树
+function HOC(WrapperComponent) {
+  return class extends WrapperComponent {
+    render() {
+      const tree = super.render();
+      const newProps = { name: 'andy' };
+      
+      return React.cloneElement(tree, newProps);
+    }
+  }
+}
+```
+
+##### 2.2 劫持原组件生命周期方法
+
+​	因为以反向继承方式实现的高阶组件实质上是对原组件的继承，所以当我们在返回的高阶组件中新增一个生命周期方法甚至是同名方法的时候，会覆盖原组件的方法，这里需要规避这种情况。
+
+```jsx
+function HOC(WrapperComponent) {
+  return class extends WrapperComponent {
+    didMount = WrapperComponent.prototype.componentDidMount;
+    
+  	componentDidMount() {
+      if(didMount) {
+        didMount.apply(this);
+      }
+      
+      // code ...
+    }
+  
+    render() {
+      return super.render();
+    }
+  }
+}
+```
+
+##### 2.3 读取/操作原组件`state`
+
+​	反向继承方式实现的高阶组件可以读取修改删除原组件的`state`。
+
+```jsx
+function HOC(WrapperComponent) {
+  return class extends WrapperComponent {
+    componentDidMount() {
+      // 此处调用WrapperComponnet中的setState方法。
+    	this.setState({ name: 'andy' });  
+    }
+    
+    render() {
+      return super.render();
+    }
+  }
+}
+```
+
+### 3. 属性代理和反向继承的对比
+
+​	属性代理是从“组合”的角度出发，这样有利于从外部去操作 `WrappedComponent`，可以操作的对象是 `props`，或者在 `WrappedComponent` 外面加一些拦截器，控制器等。
+
+​	反向继承则是从“继承”的角度出发，是从内部去操作 `WrappedComponent`，也就是可以操作组件内部的 `state` ，生命周期，`render`函数等等。
+
+## `React`中`constructor`和`super`的作用
+
+### 1. `constructor`
+
+​	这是`ES6`对类的默认构造方法，通过`new`命令生成对象实例时会调用该方法，并且该方法是类中必须有的，如果没有显式定义，则会添加一个空的`constructor()`方法。
+
+### 2. `super`
+
+​	在`class`方法中，继承是使用 `extends` 关键字来实现的。子类 必须 在`constructor()`调用`super()`方法，否则新建实例时会报错。这是因为子类没有自己的`this`对象，它只能继承父类的`this`对象，然后对其加工，而`super`就是将父类的`this`对象传递给子类的。没有`super`，子类就获取到不到`this`对象。
 
 ```jsx
 class App extends Component{
@@ -296,6 +570,23 @@ class App extends Component{
   }
 }
 ```
+
+### 3. `super()`与`super(props)`
+
+​	如果你用到了`constructor`就必须写`super()`，是用来初始化`this`的，可以绑定事件到`this`上。如果你在`constructor`中要使用`this.props`，就必须给`super`加参数，`super(props)`（注意：无论有没有`constructor`，在`render`中`this.props`都是可以使用的，这是`react`自动附带的）
+
+​	如果没用到`constructor`，是可以不写的，`react`会默认添加一个空的`constructor`
+
+### 4. `ES5...ES6`关于继承的不同之处
+
+出现上面情况的原始是`ES5`与`ES6`的继承方法不同。在`ES5`中，当对一个构造函数实例化时过程如下：
+
+		1. 生成一个空对象；
+		2. 将`this`指向这个空对象；
+		3. 将空对象的`__proto__`指向构造函数的`prototype`;
+		4. 执行构造函数。
+
+简单解释就是，在`ES5`中，先创建子类对象`this`，然后再将父类的方法挂载到`this`上，但是在`ES6`中，需要先创建父类的实例`this`，然后再用子类的构造函数修改`this`，所以要在子类中先调用`super`方法。
 
 ## 13. `StrictMode`
 
@@ -340,7 +631,7 @@ class App extends Component{
 
 
 
-### 为什么使用框架
+## 为什么使用框架
 
 1.  框架的好处:
 
