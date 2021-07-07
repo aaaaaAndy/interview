@@ -60,19 +60,19 @@
 
 ### 1. 组件化
 
-​	其中以 `React` 的组件化最为彻底,甚至可以到函数级别的原子组件,高度的组件化可以是我们的工程易于维护、易于组合拓展。
+其中以 `React` 的组件化最为彻底,甚至可以到函数级别的原子组件,高度的组件化可以是我们的工程易于维护、易于组合拓展。
 
 ### 2. 天然分层
 
- 	`JQuery` 时代的代码大部分情况下是面条代码,耦合严重,现代框架不管是 `MVC`、`MVP`还是`MVVM` 模式都能帮助我们进行分层，代码解耦更易于读写。
+`JQuery` 时代的代码大部分情况下是面条代码,耦合严重,现代框架不管是 `MVC`、`MVP`还是`MVVM` 模式都能帮助我们进行分层，代码解耦更易于读写。
 
 ### 3. 生态完整
 
-​	现在主流前端框架都自带生态,不管是数据流管理架构还是 `UI` 库都有成熟的解决方案。
+现在主流前端框架都自带生态,不管是数据流管理架构还是 `UI` 库都有成熟的解决方案。
 
 ### 4. 开发效率高
 
-​	现代前端框架都默认自动更新`DOM`,而非我们手动操作,解放了开发者的手动`DOM`成本,提高开发效率,从根本上解决了`UI` 与状态同步问题.
+现代前端框架都默认自动更新`DOM`,而非我们手动操作,解放了开发者的手动`DOM`成本,提高开发效率,从根本上解决了`UI` 与状态同步问题.
 
 ## 什么是虚拟`DOM`
 
@@ -235,7 +235,7 @@ function App() {
 
 ### 1. `16.3`之前版本生命周期
 
-​	在`react v16.3`之前的版本中，还存在`componentWillMount`、`componentWillUpdate`和`componentWillReceiveProps`三个生命周期。
+在`react v16.3`之前的版本中，还存在`componentWillMount`、`componentWillUpdate`和`componentWillReceiveProps`三个生命周期。
 
 ![16ea6f5e9424c2a2](https://raw.githubusercontent.com/aaaaaAndy/picture/main/images/16ea6f5e9424c2a2.png)
 
@@ -628,40 +628,261 @@ instance.props = props;
 
 为了避免`prop drilling`，一种常用的方法是使用**React Context**。通过定义提供数据的`Provider`组件，并允许嵌套的组件通过`Consumer`组件或`useContext` Hook 使用上下文数据
 
-## 什么是`fiber`
+## `React Fiber`实现原理
 
-`React Fiber` 是一种基于浏览器的**单线程调度算法**.
+参考文档：https://juejin.cn/post/6844903582622285831
 
-`React 16`之前，`reconcilation` 算法实际上是递归，想要中断递归是很困难的，`React 16`开始使用了循环来代替之前的递归.
+### 1. 什么是`React Fiber`
 
-`Fiber` 是`React 16`中新的协调引擎或重新实现核心算法。它的主要目标是支持虚拟DOM的增量渲染。`React Fiber`的目标是提高其在动画、布局、手势、暂停、中止或重用等方面的适用性，并为不同类型的更新分配优先级，以及新的并发原语。
+>   `React Fiber`是对核心算法的一次重新实现
 
-`React Fiber`的目标是增强其在动画、布局和手势等领域的适用性。它的主要特性是增量渲染:能够将渲染工作分割成块，并将其分散到多个帧中。
+​	老的`react`架构从`setState`到`render`完成，整个过程是主要霸占主线程的，如果组件比较大，或者有些复杂的逻辑，长时间占用主线程，会导致一些`input`框输入操作、动画等得不到相应，从而表现出页面卡顿。为了解决这一问题，`React`引入了一个全新的异步渲染架构：`Fiber`。
+
+​	`Fiber`的主要目标是实现虚拟`DOM`的增量渲染，能够将渲染工作拆分成块并将其分散到多个帧的能力。在新的更新到来时，能够暂停、中止和复用工作，能为不同类型的更新分配优先级顺序的能力。
+
+### 2. 实现`React Fiber`的基础
+
+`React`框架内部的运作可以分为3层：
+
+-   `Virtual DOM`层，描述页面长什么样；
+
+-   `Reconciler`层，负责调用生命周期方法，进行`diff`运算等；
+
+-   `Renderer`层，根据不同的平台，渲染出相应的页面，比较常见的是`ReactDOM`和`ReactNative`。
+
+`React Fiber`的改动主要在`Reconciler`层。
+
+`Fiber Reoconciler`在执行过程中，会分为2个阶段：
+
+-   阶段一：生成`fiber`树，得出需要更新的节点信息，这一步是一个渐进的过程，可以被打断；
+-   阶段二：将需要更新的节点一次过批量更新，这个过程不能被打断。
+
+### 3. `Fiber`树
+
+​	`Fiber`其实指的是一种数据结构，它可以用一个纯`JS`对象来表示：
+
+```javascript
+const fiber = {
+  stateNode,	// 节点实例
+  child,			// 子节点
+  sibling,		// 兄弟节点
+  return,			// 父节点
+}
+```
+
+​	`React`在首次渲染后会生成一个`Fiber`树，这棵树是在`Virtual DOM`树的基础上增加额外的信息来生成的，它的本质还是一个链表。在后续需要`Diff`的时候，会根据已有树和最新`Virtual DOM`的信息，生成一颗新树`workInProgress`，这颗新树每生成一个新的节点，都会将控制权交回给主线程，去检查有没有优先级更高的任务需要执行。如果没有，则继续构建树的过程；如果过程中有优先级更高的任务需要进行，则`Fiber Reconciler`会丢弃正在生成的树，在空闲的时候再重新执行一遍。
 
 ## 如何避免组件重新渲染？
 
-`React`中最常见的问题之一是组件不必要的重新渲染，`React`提供了两种方法，在这些情况下非常有用：
+### 1. `shouldComponentUpdate`
 
--   `React.memo()`：这可以防止不必要地重新渲染函数组件
--   `PureComponent`：这可以防止不必要地重新渲染类组件
+​	`React`的`shouldComponentUpdate`是一个性能优化的利器，`shouldComponentUpdate`返回一个`Boolean`类型的值：`true`代表需要重新渲染，`false`代表不需要。
 
-这两种方法都依赖于对传递给组件的`props`的浅比较，如果`props`没有改变，那么组件不会重新渲染。虽然这两种工具都非常有用，但是浅比较会带来额外的性能损失，因此如果使用不当，这两种方法都会对性能产生负面影响。
+```jsx
+shouldComponentUpdate(nextProps, nextState) {
+  // code
+}
+```
 
-## 什么是纯函数，有什么作用？
+​	你可以在内部根据`props`和`state`来决定是否需要渲染。
 
-纯函数是不依赖并且不会再其作用域之外修改变量状态的函数。本质上，纯函数时钟在给定相同参数的情况下返回相同的结果。
+### 2. `React.PureComponent`
 
+​	当组件更新时，如果组件的`props`和`state`都没有发生变化，`render`方法就不会触发，省去了`Virtual DOM`的生成和比较过程，达到提升性能的目的，其原理如下：
 
+```javascript
+if (this._compositeType === CompositeTypes.PureClass) {
+  shouldUpdate = !shallowEqual(prevProps, nextProps) || !shallowEqual(inst.state, nextState);
+}
+```
+
+​	`shallowEqual`的作用是先比较两个对象的`Object.keys()`长度是否相等，再比较每一个`key`是否两者都有，并且是否是同一个引用，简单来说`shallowEqual`只是比较了对象中第一层属性的值，嵌套的数据时比较不出来的，所以它是一种浅比较。
+
+​	当`PureComponent`中存在`shouldComponnetUpdate`时，直接判断`shouldComponentUpdate`的返回值来决定是否需要更新，只有当不存在`shouldComponentUpdate`时，才会去判断是不是`PureComponent`，是的话再去做`shallowEqual`比较。但实际上，在`PureComponent`中使用`shouldComponentUpdate`时`react`会`Warning`提示：`index.js:1 Warning: Index has a method called shouldComponentUpdate(). shouldComponentUpdate should not be used when extending React.PureComponent. Please extend React.Component if shouldComponentUpdate is used.`。
+
+​	比如下面的代码，因为`jobs`一是是同一个数组，同一个应用，所以即使`setState`代码也不会更新：
+
+```jsx
+import Person extend React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      jobs: [1, 2, 3]
+    }
+  }
+  
+  componentDidMount() {
+    const { jobs } = this.state;
+    
+    jobs.push(4);
+    
+    this.setState({ jobs });
+  }
+  
+  render() {
+    return (
+      <div>{this.state.jobs.toString()}</div>
+    )
+  }
+}
+```
+
+### 3. `React.memo`
+
+​	`shouldComponentUpdate`和`PureComponent`都是针对类组件使用，但是它们不能用于函数组件，所以在`React 16.6`版本中新增了`React.memo`方法来对函数组件进行优化，它的功能与`PureComponent`类似。只需要用`React.memo`包裹函数组件即可，这时返回一个`MemodFuncComponent`组件，此时每当有`props`或者`state`发生变化时，`React`都会检查上一个`props`、`state`和下一个`props`、`state`是否相等，如果相等则函数组件不会重新渲染，如果不相等则重新渲染函数组件。
+
+```jsx
+import React, { useState } from 'react';
+
+const Son = React.memo(function(props) {
+  return <div>{props.name}</div>
+})
+
+const Child = (props) => {
+  return <div>{props.count}</div>	
+} 
+
+function App() {
+  const [count, setCount] = useState(0);
+  const [name, setName] = useState('andy');
+
+  const handleClick = () => {
+    setCount(1);
+  }
+
+  return (
+    <div>
+      <Son name={name} />
+      <Child count={count} />
+      <button onClick={handleClick}>click</button>
+    </div>
+  )
+}
+
+export default App;
+```
+
+​	如上述代码所示，用`React.memo`包裹一个函数组件获得一个`Son`组件，当在`App`组件中触发`onClick`事件时，由于只更改了`count`，所以只会重新渲染`Child`组件，而不会渲染`Son`组件，否则，两个都会重新渲染。
+
+### 4. `React.useMemo`
+
+-   `React.memo`：判断一个函数组件是否需要重新渲染；
+-   `React.useMemo`：判断一段函数逻辑是否重新执行，它返回的是一个值，用于避免在每次渲染的时候都进行搞开销的运算；
+
+```jsx
+// 仅当num改变时才重新计算结果
+const result = useMemo(() => {
+    for (let i = 0; i < 100000; i++) {
+      (num * Math.pow(2, 15)) / 9;
+    }
+}, [num]);
+```
+
+### 5. `React.useCallback`
+
+-   `React.useMemo`：返回的的是一个值，用于避免在每次渲染时都进行高开销的计算；
+-   `React.useCallBack`：useCallback返回一个函数，当把它返回的这个函数作为子组件使用时，可以避免每次父组件更新时都重新渲染这个子组件；
+
+```jsx
+// 只有当name变化时才会重新渲染这个div
+const renderDiv = React.useCallback(() => <div>{name}</div>, [name]);
+```
 
 ## `render`函数中`return`如果没有使用`()`会有什么问题
 
--   [render函数中return如果没有使用()会有什么问题？](https://github.com/haizlin/fe-interview/issues/952)
+​	我们在使用`JSX`语法书写`react`代码时，`babel`会将`JSX`语法编译成`js`，同时会在每行自动添加**分号**（；），如果`return`后换行了，那么就会变成 `return；` 一般情况下会报错：
 
-    
+```bash
+Nothing was returned from render. This usually means a return statement is missing. Or, to render nothing, return null.
+```
+
+​	但是如果只返回一个react元素，就没有问题，因为：
+
+```jsx
+export default function App() {
+  return <a>aaa</a>;
+}
+```
 
 ## `componentWillUpdate`可以直接修改`state`的值吗？
 
--   [componentWillUpdate可以直接修改state的值吗？](https://github.com/haizlin/fe-interview/issues/951)
+​	这个问题要区分三种情况来回答：
+
+### 1. 可以直接修改`this.state`
+
+​	在`componentWillUpdate`中直接修改`this.state`而不是通过`setState`修改时是不会触发`React`新一轮更新的，这个时候是允许的。但是通过这种方式修改的`state`只是短期的，当`react`更新完成时就会重新赋值为更改之前的`state`值，如下所示
+
+```jsx
+import React, {Component} from 'react';
+
+class Index extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: 'andy',
+      age: 12
+    }
+  }
+
+  componentWillUpdate() {
+    this.state.age = 11;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    console.log(111, prevProps, prevState);
+    console.log(222, this.props, this.state);
+  }
+
+  handleClick = () => {
+    this.setState({ name: 'qiqi' });
+  }
+
+  render() {
+    return (
+      <div>
+        { this.state.name }
+        <button onClick={this.handleClick}>click</button>
+      </div>
+    );
+  }
+}
+
+export default Index;
+
+// 111 {} {name: "andy", age: 11}
+// 222 {} {name: "qiqi", age: 12}
+```
+
+### 2. 可以使用函数方式有条件地修改`state`
+
+​	你可以设置合理的条件，保证它不会在每次渲染的时候执行`this.setState()`，而只是在需要的情况下执行【这很重要】,比如下边代码所示：
+
+```jsx
+ componentWillUpdate() {
+    this.setState(function (prevState) {
+
+      if (false) {
+        return { name: 'qiqi' };
+      }
+    })
+  }
+```
+
+### 3. 不能直接使用`setState`修改
+
+​	react组件在每次需要重新渲染时候都会调用`componentWillUpdate()`,在这个函数中我们之所以不调用`this.setState()`是因为该方法会触发另一个`componentWillUpdate()`,如果我们`componentWillUpdate()`中触发状态更改,我们将以无限循环结束。
+
+​	报错如下：
+
+```bash
+Error: Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops.
+```
+
+## 说说你对React的渲染原理的理解
+
+
+
+
 
 -   [说说你对React的渲染原理的理解](https://github.com/haizlin/fe-interview/issues/950)
 

@@ -5,6 +5,10 @@ module.exports = {
 
   theme: 'reco',
 
+  markdown: {
+    toc: true
+  },
+
   themeConfig: {
     sidebar: [
       {
